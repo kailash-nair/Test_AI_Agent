@@ -1,0 +1,5 @@
+# Python dependencies for Test_AI_Agent
+openai-whisper
+transformers
+torch
+sentencepiece
