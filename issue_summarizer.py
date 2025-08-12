@@ -6,6 +6,10 @@ from typing import List, Optional
 
 from transformers import pipeline
 
+# Preload the text generation pipeline once at module import to avoid
+# re-initializing the model on every summarize call.
+summarizer = pipeline("text2text-generation", model="google/flan-t5-base")
+
 
 def summarize(
     text: str,
@@ -13,7 +17,6 @@ def summarize(
     attendees: Optional[List[str]] = None,
 ) -> str:
     """Generate structured summary from transcript."""
-    summarizer = pipeline("text2text-generation", model="google/flan-t5-base")
     prompt = (
         "You are a corporate meeting assistant. Using the transcript, summarize each "
         "issue discussed and list decisions and **action items** with owners and "
