@@ -35,16 +35,24 @@ def run(args: SummaryRequest) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Meeting summarizer AI agent")
-    parser.add_argument("video", help="Path to Teams video recording")
-    parser.add_argument("--date", required=True, help="Meeting date")
+    parser.add_argument("video", nargs="?", help="Path to Teams video recording")
+    parser.add_argument("--date", help="Meeting date")
     parser.add_argument(
         "--attendees",
-        nargs="+",
-        required=True,
+        nargs="*",
         help="List of attendees",
     )
     parser.add_argument("--output", help="Output file for the summary")
     args_ns = parser.parse_args()
+    if not args_ns.video:
+        args_ns.video = input("Video file: ").strip()
+    if not args_ns.date:
+        args_ns.date = input("Meeting date: ").strip()
+    if not args_ns.attendees:
+        attendees_raw = input("Attendees (comma-separated): ").strip()
+        args_ns.attendees = [a.strip() for a in attendees_raw.split(",") if a.strip()]
+    if not args_ns.video or not args_ns.date or not args_ns.attendees:
+        parser.error("video, --date, and --attendees are required.")
     args = SummaryRequest(
         video_path=args_ns.video,
         meeting_date=args_ns.date,
