@@ -5,7 +5,7 @@ from __future__ import annotations
 import argparse
 import os
 from dataclasses import dataclass
-from typing import List
+from typing import List, Optional
 
 from audio_extractor import extract_audio
 from whisper_transcriber import transcribe
@@ -16,8 +16,8 @@ from issue_summarizer import summarize
 @dataclass
 class SummaryRequest:
     video_path: str
-    meeting_date: str
-    attendees: List[str]
+    meeting_date: Optional[str] = None
+    attendees: Optional[List[str]] = None
     output_path: str | None = None
 
 
@@ -46,13 +46,6 @@ def main() -> None:
     args_ns = parser.parse_args()
     if not args_ns.video:
         args_ns.video = input("Video file: ").strip()
-    if not args_ns.date:
-        args_ns.date = input("Meeting date: ").strip()
-    if not args_ns.attendees:
-        attendees_raw = input("Attendees (comma-separated): ").strip()
-        args_ns.attendees = [a.strip() for a in attendees_raw.split(",") if a.strip()]
-    if not args_ns.video or not args_ns.date or not args_ns.attendees:
-        parser.error("video, --date, and --attendees are required.")
     args = SummaryRequest(
         video_path=args_ns.video,
         meeting_date=args_ns.date,
