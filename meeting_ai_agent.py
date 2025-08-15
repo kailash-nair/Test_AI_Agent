@@ -18,20 +18,24 @@ class SummaryRequest:
     video_path: str
     meeting_date: Optional[str] = None
     attendees: Optional[List[str]] = None
-    output_path: str | None = None
+    save_transcript: str | None = None
+    save_summary: str | None = None
     model_name: str = "small"
 
 
-def run(args: SummaryRequest) -> str:
+def run(args: SummaryRequest) -> tuple[str, str]:
     audio_path = os.path.splitext(args.video_path)[0] + ".wav"
     extract_audio(args.video_path, audio_path)
     transcript = transcribe(audio_path, model_name=args.model_name)
     cleaned = normalize_text(transcript)
     summary = summarize(cleaned, args.meeting_date, args.attendees)
-    if args.output_path:
-        with open(args.output_path, "w", encoding="utf-8") as f:
+    if args.save_transcript:
+        with open(args.save_transcript, "w", encoding="utf-8") as f:
+            f.write(transcript)
+    if args.save_summary:
+        with open(args.save_summary, "w", encoding="utf-8") as f:
             f.write(summary)
-    return summary
+    return transcript, summary
 
 
 def main() -> None:
@@ -43,7 +47,8 @@ def main() -> None:
         nargs="*",
         help="List of attendees",
     )
-    parser.add_argument("--output", help="Output file for the summary")
+    parser.add_argument("--save-transcript", help="File to save the transcript")
+    parser.add_argument("--save-summary", help="File to save the summary")
     parser.add_argument(
         "--model-name",
         default="small",
@@ -56,11 +61,13 @@ def main() -> None:
         video_path=args_ns.video,
         meeting_date=args_ns.date,
         attendees=args_ns.attendees,
-        output_path=args_ns.output,
+        save_transcript=args_ns.save_transcript,
+        save_summary=args_ns.save_summary,
         model_name=args_ns.model_name,
     )
-    summary = run(args)
-    print(summary)
+    transcript, summary = run(args)
+    print("Transcript:", transcript)
+    print("Summary:", summary)
 
 
 if __name__ == "__main__":
