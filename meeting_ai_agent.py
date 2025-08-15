@@ -19,12 +19,13 @@ class SummaryRequest:
     meeting_date: Optional[str] = None
     attendees: Optional[List[str]] = None
     output_path: str | None = None
+    model_name: str = "small"
 
 
 def run(args: SummaryRequest) -> str:
     audio_path = os.path.splitext(args.video_path)[0] + ".wav"
     extract_audio(args.video_path, audio_path)
-    transcript = transcribe(audio_path)
+    transcript = transcribe(audio_path, model_name=args.model_name)
     cleaned = normalize_text(transcript)
     summary = summarize(cleaned, args.meeting_date, args.attendees)
     if args.output_path:
@@ -43,6 +44,11 @@ def main() -> None:
         help="List of attendees",
     )
     parser.add_argument("--output", help="Output file for the summary")
+    parser.add_argument(
+        "--model-name",
+        default="small",
+        help="Whisper model to use for transcription",
+    )
     args_ns = parser.parse_args()
     if not args_ns.video:
         args_ns.video = input("Video file: ").strip()
@@ -51,6 +57,7 @@ def main() -> None:
         meeting_date=args_ns.date,
         attendees=args_ns.attendees,
         output_path=args_ns.output,
+        model_name=args_ns.model_name,
     )
     summary = run(args)
     print(summary)
